@@ -3,12 +3,15 @@ package com.wadud.facedetection.components
 import android.content.Context
 import android.view.ViewGroup
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
@@ -21,7 +24,8 @@ import kotlin.coroutines.suspendCoroutine
 fun CameraPreview(
     modifier: Modifier,
     scaleType: PreviewView.ScaleType = PreviewView.ScaleType.FILL_CENTER,
-    cameraSelector : CameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
+    cameraSelector : CameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA,
+    onImageReceived: (ImageProxy) -> Unit,
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val coroutineScope = rememberCoroutineScope()
@@ -35,13 +39,16 @@ fun CameraPreview(
             this.scaleType = scaleType
         }
 
-        val previewUseCase = Preview.Builder().build()
-        previewUseCase.setSurfaceProvider(previewView.surfaceProvider)
-
         coroutineScope.launch {
             val cameraProvider = context.cameraProvider()
+            val imageAnalysis = ImageAnalysis.Builder()
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                .build()
+            imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(context)){
+                onImageReceived(it)
+            }
             cameraProvider.unbindAll()
-            cameraProvider.bindToLifecycle(lifecycleOwner,cameraSelector, previewUseCase)
+            cameraProvider.bindToLifecycle(lifecycleOwner,cameraSelector, imageAnalysis)
         }
 
         previewView

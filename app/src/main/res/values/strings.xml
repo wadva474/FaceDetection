@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">FaceDetection</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="grant"> Grant Permission</string>
+    <string name="permission_required">Permission Required</string>
+    <string name="permission_description">It seems you have permanently declined camera permission you can go to app settings to grant it</string>
 </resources>
