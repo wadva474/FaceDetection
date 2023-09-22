@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.wadud.facedetection.components.CameraPreview
 
@@ -22,8 +23,8 @@ import com.wadud.facedetection.components.CameraPreview
 fun FaceDetectionScreen(
     modifier: Modifier = Modifier,
     navigateBack: () -> Unit = {},
-    onImageReceived : (ImageProxy) -> Unit = {},
-    imageDetectedResult : String = "Place your face within the camera range"
+    onImageReceived: (ImageProxy) -> Unit = {},
+    imageDetectedResult: String = ""
 ) {
     ConstraintLayout(modifier = modifier.fillMaxSize()) {
         val (cameraPreview, stopScanningButton, detectionText) = createRefs()
@@ -37,7 +38,7 @@ fun FaceDetectionScreen(
                 }
                 .fillMaxWidth()
                 .fillMaxHeight()
-        ){
+        ) {
             onImageReceived(it)
         }
 
@@ -48,7 +49,8 @@ fun FaceDetectionScreen(
                     centerHorizontallyTo(parent)
                 }
                 .padding(top = 16.dp),
-            text = imageDetectedResult, color = Color.White
+            text = imageDetectedResult, color = Color.White,
+            fontSize = 30.sp
         )
 
         Button(

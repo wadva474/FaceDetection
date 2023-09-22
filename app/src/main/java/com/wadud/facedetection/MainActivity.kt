@@ -3,19 +3,17 @@ package com.wadud.facedetection
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.wadud.facedetection.components.CameraPreview
 import com.wadud.facedetection.routing.Screen
 import com.wadud.facedetection.screen.FaceDetectionScreen
 import com.wadud.facedetection.screen.StartCameraScreen
@@ -45,34 +43,32 @@ class MainActivity : ComponentActivity() {
     @Composable
     private fun AppContent() {
         val navController = rememberNavController()
-        val navBackStackEntry by navController.currentBackStackEntryAsState()
         val viewModel: FaceAnalyzerViewModel = viewModel()
-        Crossfade(
-            targetState = navBackStackEntry?.destination?.route,
-            label = ""
-        ) { route: String? ->
-            NavHost(
-                navController = navController,
-                startDestination = Screen.StartCamera.route
-            ) {
-                composable(Screen.StartCamera.route) {
-                    StartCameraScreen(
-                        shouldShowPermissionRationale = !shouldShowRequestPermissionRationale(
-                            cameraPermission
-                        ),
-                        { openSettings() },
-                        { navController.navigate(Screen.DetectFaces.route) })
-                }
-                composable(Screen.DetectFaces.route) {
-                    FaceDetectionScreen(
-                        navigateBack = { navController.popBackStack() },
-                        onImageReceived = { imageProxy ->
-                            viewModel.processImage(imageProxy)
-                        },
-                        imageDetectedResult = viewModel.faceDetected.collectAsState().value
-                    )
-                }
+
+        NavHost(
+            navController = navController,
+            startDestination = Screen.StartCamera.route
+        ) {
+            composable(Screen.StartCamera.route) {
+                StartCameraScreen(
+                    shouldShowPermissionRationale = !shouldShowRequestPermissionRationale(
+                        cameraPermission
+                    ),
+                    { openSettings() },
+                    { navController.navigate(Screen.DetectFaces.route) })
+            }
+            composable(Screen.DetectFaces.route) {
+                FaceDetectionScreen(
+                    navigateBack = { navController.popBackStack() },
+                    onImageReceived = { imageProxy ->
+                        viewModel.processImage(imageProxy)
+                    },
+                    imageDetectedResult = viewModel.faceDetected.collectAsState().value
+                )
             }
         }
     }
+
 }
+
+

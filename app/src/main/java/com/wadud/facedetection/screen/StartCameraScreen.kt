@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import com.wadud.facedetection.util.checkPermissionForCamera
 
 
 const val cameraPermission = Manifest.permission.CAMERA
@@ -39,7 +40,7 @@ fun StartCameraScreen(
 ) {
     val context = LocalContext.current
     var isCameraPermissionGranted by remember {
-        mutableStateOf(checkPermissionForCamera(context, cameraPermission))
+        mutableStateOf(context.checkPermissionForCamera(cameraPermission))
     }
 
     val launcher = rememberLauncherForActivityResult(
@@ -61,9 +62,7 @@ fun StartCameraScreen(
                 .heightIn(68.dp)
                 .padding(bottom = 18.dp),
             onClick = {
-                if (!isCameraPermissionGranted && shouldShowPermissionRationale) {
-                    onGotoAppSettingClicked.invoke()
-                } else if (!isCameraPermissionGranted) launcher.launch(cameraPermission)
+                if (!isCameraPermissionGranted) launcher.launch(cameraPermission)
                 else {
                     navigateToDetectionScreen.invoke()
                 }
@@ -73,8 +72,6 @@ fun StartCameraScreen(
     }
 }
 
-fun checkPermissionForCamera(context: Context, permission: String): Boolean =
-    ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
 
 
 

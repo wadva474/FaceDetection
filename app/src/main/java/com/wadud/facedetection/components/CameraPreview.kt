@@ -11,7 +11,6 @@ import androidx.camera.view.PreviewView
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
@@ -24,7 +23,7 @@ import kotlin.coroutines.suspendCoroutine
 fun CameraPreview(
     modifier: Modifier,
     scaleType: PreviewView.ScaleType = PreviewView.ScaleType.FILL_CENTER,
-    cameraSelector : CameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA,
+    cameraSelector: CameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA,
     onImageReceived: (ImageProxy) -> Unit,
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -39,20 +38,29 @@ fun CameraPreview(
             this.scaleType = scaleType
         }
 
+        val previewUseCase = Preview.Builder().build()
+        previewUseCase.setSurfaceProvider(previewView.surfaceProvider)
+
+        val imageAnalysisUseCase = ImageAnalysis.Builder()
+            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+            .build()
+        imageAnalysisUseCase.setAnalyzer(ContextCompat.getMainExecutor(context)) {
+            onImageReceived(it)
+        }
+
         coroutineScope.launch {
             val cameraProvider = context.cameraProvider()
-            val imageAnalysis = ImageAnalysis.Builder()
-                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                .build()
-            imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(context)){
-                onImageReceived(it)
-            }
             cameraProvider.unbindAll()
-            cameraProvider.bindToLifecycle(lifecycleOwner,cameraSelector, imageAnalysis)
+            cameraProvider.bindToLifecycle(
+                lifecycleOwner,
+                cameraSelector,
+                imageAnalysisUseCase,
+                previewUseCase
+            )
         }
 
         previewView
-    })
+    }, modifier = modifier)
 
 }
 
